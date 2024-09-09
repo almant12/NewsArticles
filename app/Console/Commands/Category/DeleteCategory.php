@@ -34,7 +34,7 @@ class DeleteCategory extends Command
             Category::where('id',$id)->delete();
             $this->info('Category deleted successfully');
             return 0;
-            
+               
         }
     }
 }
