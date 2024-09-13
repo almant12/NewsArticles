@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Article;
+namespace App\Http\Controllers\Admin\Article;
 
+use App\Events\NewArticle;
 use App\Exceptions\Handler;
 use App\Models\Article;
 use App\Service\ImageUploadService;
@@ -10,6 +11,7 @@ use App\Http\Requests\Article\ArticleRequest;
 use App\Http\Resources\Article\ArticleResource;
 use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ArticleControlle extends Controller
@@ -35,6 +37,7 @@ class ArticleControlle extends Controller
     public function store(ArticleRequest $request):ArticleResource
     {
 
+        $user = auth('sanctum')->user();
         $imagePath = $this->imageUploadService->uploadImage($request,'image','images');
 
         $article = new Article();
@@ -43,9 +46,11 @@ class ArticleControlle extends Controller
         $article->description = $request->description;
         $article->content = $request->content;
         $article->published_at = Carbon::parse($request->published_at);
-        $article->author_id = $request->author_id;
+        $article->author_id = $user->id;
         $article->category_id = $request->category_id;
         $article->save();
+
+        broadcast(new NewArticle('ckemi'));
 
         return new ArticleResource($article);
     }
@@ -53,30 +58,36 @@ class ArticleControlle extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Article $article)
+    public function show(Article $article):ArticleResource
     {
-        //
+        return new ArticleResource($article);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(ArticleRequest $request, Article $article)
+    public function update(ArticleRequest $request, Article $article):ArticleResource
     {
-        //
+        $user = auth('sanctum')->user();
+        $imagePath = $this->imageUploadService->updateImage($request,'image',$article->image,'images');
+
+        $article->title = $request->title;
+        $article->image = empty(!$imagePath) ? $imagePath : $article->image;
+        $article->description = $request->description;
+        $article->content = $request->content;
+        $article->published_at = Carbon::parse($request->published_at);
+        $article->author_id = $user->id;
+        $article->category_id = $request->category_id;
+        $article->update();
+
+        return new ArticleResource($article);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Article $article)
+    public function destroy(Article $article): JsonResponse
     {
-        $user = auth('sanctum')->user();
-
-        if($user->id !== $article->author_id){
-           throw new Handler();
-        }
-
         $article->delete();
         return response()->json(['message'=>'Deleted Successfully'],200);
     }

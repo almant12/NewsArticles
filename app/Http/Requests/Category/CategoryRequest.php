@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Article;
+namespace App\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ArticleRequest extends FormRequest
+class CategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,14 +21,8 @@ class ArticleRequest extends FormRequest
      */
     public function rules(): array
     {
-       
         return [
-            'title'=>['required','string','max:255'],
-            'image'=>['required','image','mimes:png,jpg,jpeg'],
-            'description'=>['required','string'],
-            'content'=>['required','string'],
-            'published_at'=>['required','date'],
-            'category_id'=>['required','integer','exists:categories,id']
+           'name' => ['required','string','unique:categories,name']
         ];
     }
 }
