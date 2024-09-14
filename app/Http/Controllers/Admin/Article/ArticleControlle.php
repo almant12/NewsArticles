@@ -50,7 +50,7 @@ class ArticleControlle extends Controller
         $article->category_id = $request->category_id;
         $article->save();
 
-        broadcast(new NewArticle('ckemi'));
+        event(new NewArticle('ckemi'));
 
         return new ArticleResource($article);
     }
