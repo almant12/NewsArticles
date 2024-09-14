@@ -15,10 +15,12 @@ class NewArticle implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    private $article;
-    public function __construct($article)
+    public $id;
+    public $title;
+    public function __construct($id,$title)
     {
-        $this->article = $article;
+        $this->id = $id;
+        $this->title = $title;
     }
 
     /**
